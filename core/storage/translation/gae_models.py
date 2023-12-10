@@ -63,7 +63,7 @@ class EntityTranslationsModel(base_models.BaseModel):
         return base_models.DELETION_POLICY.NOT_APPLICABLE
 
     @staticmethod
-    def get_model_association_to_user(
+    def get_entity_translation_model_association_to_user(
     ) -> base_models.MODEL_ASSOCIATION_TO_USER:
         """Model does not contain user data."""
         return base_models.MODEL_ASSOCIATION_TO_USER.NOT_CORRESPONDING_TO_USER
@@ -80,7 +80,7 @@ class EntityTranslationsModel(base_models.BaseModel):
         })
 
     @staticmethod
-    def _generate_id(
+    def _generate_entity_id(
         entity_type: feconf.TranslatableEntityType,
         entity_id: str,
         entity_version: int,
@@ -102,7 +102,7 @@ class EntityTranslationsModel(base_models.BaseModel):
             entity_type.value, entity_id, str(entity_version), language_code)
 
     @classmethod
-    def get_model(
+    def get_entity_translation_model(
         cls,
         entity_type: feconf.TranslatableEntityType,
         entity_id: str,
@@ -127,12 +127,12 @@ class EntityTranslationsModel(base_models.BaseModel):
             instance corresponding to the given inputs, if such a translation
             exists, or None if no translation is found.
         """
-        model_id = cls._generate_id(
+        model_id = cls._generate_entity_id(
             entity_type, entity_id, entity_version, language_code)
         return cls.get_by_id(model_id)
 
     @classmethod
-    def get_all_for_entity(
+    def get_all_translation_model_for_entity(
         cls,
         entity_type: feconf.TranslatableEntityType,
         entity_id: str,
@@ -161,7 +161,7 @@ class EntityTranslationsModel(base_models.BaseModel):
         ).fetch()
 
     @classmethod
-    def create_new(
+    def create_new_entity_model(
         cls,
         entity_type: str,
         entity_id: str,
@@ -183,7 +183,7 @@ class EntityTranslationsModel(base_models.BaseModel):
             EntityTranslationsModel. Returns a new EntityTranslationsModel.
         """
         return cls(
-            id=cls._generate_id(
+            id=cls._generate_entity_id(
                 feconf.TranslatableEntityType(
                     entity_type),
                 entity_id, entity_version, language_code),
@@ -205,9 +205,9 @@ class MachineTranslationModel(base_models.BaseModel):
 
         [source_language_code].[target_language_code].[hashed_source_text]
 
-    See MachineTranslationModel._generate_id() below for details.
+    See MachineTranslationModel._generate_entity_id() below for details.
     The same origin text, source_language_code, and target_language_code always
-    maps to the same key and therefore always returns the same translated_text.
+    maps to the same key and therefore always returns the same machine_translated_text.
     """
 
     # The untranslated source text.
@@ -226,16 +226,16 @@ class MachineTranslationModel(base_models.BaseModel):
         required=True, indexed=True)
     # The machine generated translation of the source text into the target
     # language.
-    translated_text = datastore_services.TextProperty(
+    machine_translated_text = datastore_services.TextProperty(
         required=True, indexed=False)
 
     @classmethod
-    def create(
+    def create_machine_translation_model(
         cls,
         source_language_code: str,
         target_language_code: str,
         source_text: str,
-        translated_text: str
+        machine_translated_text: str
     ) -> Optional[str]:
         """Creates a new MachineTranslationModel instance and returns its ID.
 
@@ -246,7 +246,7 @@ class MachineTranslationModel(base_models.BaseModel):
                 translation language. Must be different from
                 source_language_code.
             source_text: str. The untranslated source text.
-            translated_text: str. The machine generated translation of the
+            machine_translated_text: str. The machine generated translation of the
                 source text into the target language.
 
         Returns:
@@ -259,7 +259,7 @@ class MachineTranslationModel(base_models.BaseModel):
         # SHA-1 always produces a 40 digit hash. 50 is chosen here to prevent
         # convert_to_hash from truncating the hash.
         hashed_source_text = utils.convert_to_hash(source_text, 50)
-        entity_id = cls._generate_id(
+        entity_id = cls._generate_entity_id(
             source_language_code, target_language_code, hashed_source_text)
         translation_entity = cls(
             id=entity_id,
@@ -267,12 +267,12 @@ class MachineTranslationModel(base_models.BaseModel):
             source_language_code=source_language_code,
             target_language_code=target_language_code,
             source_text=source_text,
-            translated_text=translated_text)
+            machine_translated_text=machine_translated_text)
         translation_entity.put()
         return entity_id
 
     @staticmethod
-    def _generate_id(
+    def _generate_entity_id(
         source_language_code: str,
         target_language_code: str,
         hashed_source_text: str
@@ -323,7 +323,7 @@ class MachineTranslationModel(base_models.BaseModel):
             exists, or None if no translation is found.
         """
         hashed_source_text = utils.convert_to_hash(source_text, 50)
-        instance_id = cls._generate_id(
+        instance_id = cls._generate_entity_id(
             source_language_code, target_language_code, hashed_source_text)
         return cls.get(instance_id, strict=False)
 
@@ -333,7 +333,7 @@ class MachineTranslationModel(base_models.BaseModel):
         return base_models.DELETION_POLICY.NOT_APPLICABLE
 
     @staticmethod
-    def get_model_association_to_user(
+    def get_entity_translation_model_association_to_user(
     ) -> base_models.MODEL_ASSOCIATION_TO_USER:
         """Model is not associated with users."""
         return base_models.MODEL_ASSOCIATION_TO_USER.NOT_CORRESPONDING_TO_USER
@@ -346,5 +346,5 @@ class MachineTranslationModel(base_models.BaseModel):
             'hashed_source_text': base_models.EXPORT_POLICY.NOT_APPLICABLE,
             'source_language_code': base_models.EXPORT_POLICY.NOT_APPLICABLE,
             'target_language_code': base_models.EXPORT_POLICY.NOT_APPLICABLE,
-            'translated_text': base_models.EXPORT_POLICY.NOT_APPLICABLE
+            'machine_translated_text': base_models.EXPORT_POLICY.NOT_APPLICABLE
         })
