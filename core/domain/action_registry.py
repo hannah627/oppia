@@ -57,15 +57,18 @@ class Registry:
         cls._actions.clear()
 
         for action_type in cls.get_all_action_types():
-            module_path_parts = feconf.ACTIONS_DIR.split(os.sep)
-            module_path_parts.extend([action_type, action_type])
-            module = importlib.import_module('.'.join(module_path_parts))
+            module = import_module_corresponding_with_action(action_type)
             clazz = getattr(module, action_type)
 
-            ancestor_names = [
-                base_class.__name__ for base_class in clazz.__bases__]
+            ancestor_names = [base_class.__name__ for base_class in clazz.__bases__]
             if 'BaseLearnerActionSpec' in ancestor_names:
                 cls._actions[clazz.__name__] = clazz()
+
+    def import_module_corresponding_with_action(action_type) -> module:
+        module_path_parts = feconf.ACTIONS_DIR.split(os.sep)
+        module_path_parts.extend([action_type, action_type])
+        module = importlib.import_module('.'.join(module_path_parts))
+        return module
 
     @classmethod
     def get_all_actions(cls) -> List[base.BaseLearnerActionSpec]:
