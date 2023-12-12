@@ -53,22 +53,6 @@ class ActivityReference:
         """
         return '%s:%s' % (self.type, self.id)
 
-    def validate(self) -> None:
-        """Checks that all fields of this ActivityReference domain object
-        are valid.
-
-        Raises:
-            Exception. The activity type is invalid.
-        """
-        if (self.type not in (
-                constants.ACTIVITY_TYPE_EXPLORATION,
-                constants.ACTIVITY_TYPE_COLLECTION
-        )):
-            raise Exception('Invalid activity type: %s' % self.type)
-        if not isinstance(self.id, str):
-            raise Exception(
-                'Expected id to be a string but found %s' % self.id)
-
     def to_dict(self) -> Dict[str, str]:
         """Returns a dict representing this ActivityReference domain object.
 
@@ -97,6 +81,21 @@ class ActivityReference:
         return cls(
             activity_reference_dict['type'], activity_reference_dict['id'])
 
+def validate_activity_reference(activity_reference: ActivityReference) -> None:
+    """Checks that all fields of this ActivityReference domain object
+    are valid.
+
+    Raises:
+        Exception. The activity type is invalid.
+    """
+    if (activity_reference.type not in (
+            constants.ACTIVITY_TYPE_EXPLORATION,
+            constants.ACTIVITY_TYPE_COLLECTION
+    )):
+        raise Exception('Invalid activity type: %s' % activity_reference.type)
+    if not isinstance(activity_reference.id, str):
+        raise Exception(
+            'Expected id to be a string but found %s' % activity_reference.id)
 
 class ActivityReferences:
     """Domain object for a list of activity references.
@@ -124,4 +123,4 @@ class ActivityReferences:
                 is invalid.
         """
         for reference in self.activity_reference_list:
-            reference.validate()
+            validate_activity_reference(reference)

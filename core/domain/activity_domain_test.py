@@ -20,6 +20,8 @@ from __future__ import annotations
 
 from core.domain import activity_domain
 from core.tests import test_utils
+from activity_domain import validate_activity_reference
+
 
 
 class ActivityReferenceDomainUnitTests(test_utils.GenericTestBase):
@@ -46,7 +48,7 @@ class ActivityReferenceDomainUnitTests(test_utils.GenericTestBase):
     def test_validate_with_invalid_type(self) -> None:
         with self.assertRaisesRegex(
             Exception, 'Invalid activity type: invalid_activity_type'):
-            self.invalid_activity_reference_with_invalid_type.validate()
+            validate_activity_reference(self.invalid_activity_reference_with_invalid_type)
 
     def test_validate_with_invalid_id(self) -> None:
         # TODO(#13528): Here we use MyPy ignore because we remove this test
@@ -57,7 +59,7 @@ class ActivityReferenceDomainUnitTests(test_utils.GenericTestBase):
             activity_domain.ActivityReference('exploration', 1234))  # type: ignore[arg-type]
         with self.assertRaisesRegex(
             Exception, ('Expected id to be a string but found 1234')):
-            invalid_activity_reference_with_invalid_id.validate()
+            validate_activity_reference(invalid_activity_reference_with_invalid_id)
 
     def test_to_dict(self) -> None:
         exp_dict = self.exp_activity_reference.to_dict()
@@ -111,11 +113,11 @@ class ActivityReferencesDomainUnitTests(test_utils.GenericTestBase):
                 exp_activity_reference, invalid_activity_reference]))
 
     def test_validate_passes_with_valid_activity_reference_list(self) -> None:
-        self.valid_activity_references.validate()
+        validate_activity_reference(self.valid_activity_references)
 
     def test_validate_fails_with_invalid_type_in_activity_reference_list(
         self
     ) -> None:
         with self.assertRaisesRegex(
             Exception, 'Invalid activity type: invalid_activity_type'):
-            self.invalid_activity_references.validate()
+            validate_activity_reference(self.invalid_activity_references)
