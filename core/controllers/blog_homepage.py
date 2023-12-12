@@ -78,41 +78,65 @@ def _get_blog_card_summary_dicts_for_homepage(
     Returns:
         list(dict). The list of blog post summary dicts.
     """
-    summary_dicts: List[BlogCardSummaryDict] = []
-    for summary in summaries:
-        summary_dict = summary.to_dict()
-        user_settings = user_services.get_user_settings(
-            summary_dict['author_id'], strict=False)
-        author_details = blog_services.get_blog_author_details(
-            summary_dict['author_id'])
-        if user_settings:
-            card_summary_dict: BlogCardSummaryDict = {
-                'id': summary_dict['id'],
-                'title': summary_dict['title'],
-                'summary': summary_dict['summary'],
-                'author_username': user_settings.username,
-                'tags': summary_dict['tags'],
-                'thumbnail_filename': summary_dict['thumbnail_filename'],
-                'url_fragment': summary_dict['url_fragment'],
-                'published_on': summary_dict['published_on'],
-                'last_updated': summary_dict['last_updated'],
-                'displayed_author_name': author_details.displayed_author_name
-            }
-        else:
-            card_summary_dict = {
-                'id': summary_dict['id'],
-                'title': summary_dict['title'],
-                'summary': summary_dict['summary'],
-                'author_username': 'author account deleted',
-                'tags': summary_dict['tags'],
-                'thumbnail_filename': summary_dict['thumbnail_filename'],
-                'url_fragment': summary_dict['url_fragment'],
-                'published_on': summary_dict['published_on'],
-                'last_updated': summary_dict['last_updated'],
-                'displayed_author_name': author_details.displayed_author_name
-            }
-        summary_dicts.append(card_summary_dict)
+    summary_dicts: List[BlogCardSummaryDict] = [
+
+        {
+            'id': summary.to_dict()['id'],
+            'title': summary.to_dict()['title'],
+            'summary': summary.to_dict()['summary'],
+            'author_username': (
+                user_services.get_user_settings(summary.to_dict()['author_id'], strict=False).username
+                if user_services.get_user_settings(summary.to_dict()['author_id'], strict=False)
+                else 'author account deleted'
+            ),
+            'tags': summary.to_dict()['tags'],
+            'thumbnail_filename': summary.to_dict()['thumbnail_filename'],
+            'url_fragment': summary.to_dict()['url_fragment'],
+            'published_on': summary.to_dict()['published_on'],
+            'last_updated': summary.to_dict()['last_updated'],
+            'displayed_author_name': blog_services.get_blog_author_details(
+                summary.to_dict()['author_id']
+            ).displayed_author_name,
+        }
+        for summary in summaries
+    ]
     return summary_dicts
+
+ # summary_dicts: List[BlogCardSummaryDict] = []
+ #    for summary in summaries:
+ #        summary_dict = summary.to_dict()
+ #        user_settings = user_services.get_user_settings(
+ #            summary_dict['author_id'], strict=False)
+ #        author_details = blog_services.get_blog_author_details(
+ #            summary_dict['author_id'])
+ #        if user_settings:
+ #            card_summary_dict: BlogCardSummaryDict = {
+ #                'id': summary_dict['id'],
+ #                'title': summary_dict['title'],
+ #                'summary': summary_dict['summary'],
+ #                'author_username': user_settings.username,
+ #                'tags': summary_dict['tags'],
+ #                'thumbnail_filename': summary_dict['thumbnail_filename'],
+ #                'url_fragment': summary_dict['url_fragment'],
+ #                'published_on': summary_dict['published_on'],
+ #                'last_updated': summary_dict['last_updated'],
+ #                'displayed_author_name': author_details.displayed_author_name
+ #            }
+ #        else:
+ #            card_summary_dict = {
+ #                'id': summary_dict['id'],
+ #                'title': summary_dict['title'],
+ #                'summary': summary_dict['summary'],
+ #                'author_username': 'author account deleted',
+ #                'tags': summary_dict['tags'],
+ #                'thumbnail_filename': summary_dict['thumbnail_filename'],
+ #                'url_fragment': summary_dict['url_fragment'],
+ #                'published_on': summary_dict['published_on'],
+ #                'last_updated': summary_dict['last_updated'],
+ #                'displayed_author_name': author_details.displayed_author_name
+ #            }
+ #        summary_dicts.append(card_summary_dict)
+ #    return summary_dicts
 
 
 def _get_matching_blog_card_summary_dicts(
